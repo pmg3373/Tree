@@ -1,0 +1,176 @@
+   1 0000               # File:		build.asm
+   2 0000               # Author:	K. Reek
+   3 0000               # Contributors:	P. White,
+   4 0000               #		W. Carithers,
+   5 0000               #		<<<YOUR NAME HERE>>>
+   6 0000               #
+   7 0000               # Description:	Binary tree building functions.
+   8 0000               #
+   9 0000               # Revisions:	$Log$
+  10 0000               
+  11 0000               	.data
+  12 0000               	.align 2
+  13 0000 00000004			.word node_memory_pointer
+  14 0004 00000000		node_memory_pointer:	.word 0
+  15 0000               	.text			# this is program code
+  16 0000               	.align 2		# instructions must be on word boundaries
+  17 0000               
+  18 0000               # 
+  19 0000               # Name:		add_elements
+  20 0000               #
+  21 0000               # Description:	loops through array of numbers, adding each (in order)
+  22 0000               #		to the tree
+  23 0000               #
+  24 0000               # Arguments:	a0 the address of the array
+  25 0000               #   		a1 the number of elements in the array
+  26 0000               #		a2 the address of the root pointer
+  27 0000               # Returns:	none
+  28 0000               #
+  29 0000               
+  30 0000               	.globl	add_elements
+  31 0000               	
+  32 0000               add_elements:
+  33 0000 23BDFFF0		addi 	$sp, $sp, -16
+  34 0004 AFBF000C		sw 	$ra, 12($sp)
+  35 0008 AFB20008		sw 	$s2, 8($sp)
+  36 000c AFB10004		sw 	$s1, 4($sp)
+  37 0010 AFB00000		sw 	$s0, 0($sp)
+  38 0014               
+  39 0014               #***** BEGIN STUDENT CODE BLOCK 1 ***************************
+  40 0014               #
+  41 0014               # Insert your code to iterate through the array, calling build_tree
+  42 0014               # for each value in the array.  Remember that build_tree requires
+  43 0014               # two parameters:  the address of the variable which contains the
+  44 0014               # root pointer for the tree, and the number to be inserted.
+  45 0014               #
+  46 0014               # Feel free to save extra "S" registers onto the stack if you need
+  47 0014               # more for your function.
+  48 0014               #
+  49 0014               
+  50 0014               #
+  51 0014               # If you saved extra "S" reg to stack, make sure you restore them
+  52 0014               #
+  53 0014               
+  54 0014 20900000		addi	$s0, $a0, 0
+  55 0018 20B10000		addi	$s1, $a1, 0
+  56 001c 20D20000		addi	$s2, $a2, 0
+  57 0020               	
+  58 0020               begin_loop_add:
+  59 0020 8E050000		lw $a1, 0($s0)
+  60 0024 22100004		addi $s0, $s0, 4
+  61 0028 2231FFFF		addi $s1, $s1, -1
+  62 002c 22440000		addi $a0, $s2, 0
+  63 0030 0C000014		jal	build_tree
+  64 0034 1620FFFA		bne $s1, $zero, begin_loop_add
+  65 0038               
+  66 0038               #***** END STUDENT CODE BLOCK 1 *****************************
+  67 0038               
+  68 0038               add_done:
+  69 0038               
+  70 0038 8FBF000C		lw 	$ra, 12($sp)
+  71 003c 8FB20008		lw 	$s2, 8($sp)
+  72 0040 8FB10004		lw 	$s1, 4($sp)
+  73 0044 8FB00000		lw 	$s0, 0($sp)
+  74 0048 23BD0010		addi 	$sp, $sp, 16
+  75 004c 03E00008		jr 	$ra
+  76 0050               
+  77 0050               #***** BEGIN STUDENT CODE BLOCK 2 ***************************
+  78 0050               #
+  79 0050               # Put your build_tree subroutine here.
+  80 0050               #
+  81 0050               # 
+  82 0050               # Name:		build_tree
+  83 0050               #
+  84 0050               # Description:	inserts a single element into the tree
+  85 0050               #
+  86 0050               # Arguments:	a0 the address of the root node
+  87 0050               #   		a1 the number to insert
+  88 0050               # Returns:	none
+  89 0050               #
+  90 0050               .globl allocate_mem
+  91 0050               build_tree:
+  92 0050 23BDFFF8		addi $sp, $sp, -8
+  93 0054 AFB00000		sw	$s0, 0($sp)
+  94 0058 AFB10004		sw	$s1, 4($sp)
+  95 005c               	
+  96 005c 20900000		addi	$s0, $a0, 0
+  97 0060 20B10000		addi	$s1, $a1, 0
+  98 0064               	
+  99 0064 8E080000		lw	$t0, 0($s0)		#Loads pointer to root node
+ 100 0068 1500000A		bne	$t0, $zero, begin_iter
+ 101 006c               	
+ 102 006c 34040003		li	$a0, 3		#3 words per node
+ 103 0070 0C000000		jal allocate_mem
+ 104 0074               	
+ 105 0074 AE020000		sw	$v0, 0($s0)		#store address of my memory in address passed
+ 106 0078 AC510000		sw	$s1, 0($v0)		#store the number at my root address
+ 107 007c AC400004		sw	$zero, 4($v0)	#be sure to zero pointers to children
+ 108 0080 AC400008		sw	$zero, 8($v0)
+ 109 0084               	
+ 110 0084 8FB00000		lw	$s0, 0($sp)
+ 111 0088 8FB10004		lw	$s1, 4($sp)
+ 112 008c 23BD0008		addi $sp, $sp, 8
+ 113 0090 03E00008		jr	$ra
+ 114 0094               	
+ 115 0094               	
+ 116 0094               begin_iter:
+ 117 0094 8D090000		lw	$t1, 0($t0)		#Loads root node value
+ 118 0098 1131001E		beq	$t1, $s1, end_iter
+ 119 009c               	
+ 120 009c 0131502A		slt $t2, $t1, $s1
+ 121 00a0 1540000E		bne $t2, $zero, less_than
+ 122 00a4               	
+ 123 00a4 8D080008		lw	$t0, 8($t0)		#get right child, the number is bigger
+ 124 00a8 1500000A		bne	$t0, $zero, have_right
+ 125 00ac 34040003		li	$a0, 3		#3 words per node
+ 126 00b0 0C000000		jal allocate_mem
+ 127 00b4 AD220008		sw	$v0, 8($t1)
+ 128 00b8 AC510000		sw	$s1, 0($v0)
+ 129 00bc AC400004		sw	$zero, 4($v0)	#be sure to zero pointers to children
+ 130 00c0 AC400008		sw	$zero, 8($v0)
+ 131 00c4               	
+ 132 00c4 8FB00000		lw	$s0, 0($sp)
+ 133 00c8 8FB10004		lw	$s1, 4($sp)
+ 134 00cc 23BD0008		addi $sp, $sp, 8
+ 135 00d0 03E00008		jr $ra
+ 136 00d4               have_right:
+ 137 00d4 21280008		addi $t0, $t1, 8
+ 138 00d8 08000025		j begin_iter
+ 139 00dc               	
+ 140 00dc               less_than:
+ 141 00dc 8D080004		lw	$t0, 4($t0)		#get right child, the number is bigger
+ 142 00e0 1500000A		bne	$t0, $zero, have_left
+ 143 00e4 34040003		li	$a0, 3		#3 words per node
+ 144 00e8 0C000000		jal allocate_mem
+ 145 00ec AD220004		sw	$v0, 4($t1)
+ 146 00f0 AC510000		sw	$s1, 0($v0)
+ 147 00f4 AC400004		sw	$zero, 4($v0)	#be sure to zero pointers to children
+ 148 00f8 AC400008		sw	$zero, 8($v0)
+ 149 00fc               	
+ 150 00fc 8FB00000		lw	$s0, 0($sp)
+ 151 0100 8FB10004		lw	$s1, 4($sp)
+ 152 0104 23BD0008		addi $sp, $sp, 8
+ 153 0108 03E00008		jr $ra
+ 154 010c               have_left:
+ 155 010c 21280004		addi $t0, $t1, 4
+ 156 0110 08000025		j begin_iter
+ 157 0114               	
+ 158 0114               end_iter:
+ 159 0114 8FB00000		lw	$s0, 0($sp)
+ 160 0118 8FB10004		lw	$s1, 4($sp)
+ 161 011c 23BD0008		addi $sp, $sp, 8
+ 162 0120 03E00008		jr	$ra
+ 163 0124               #***** END STUDENT CODE BLOCK 2 *****************************
+
+
+add_done               00000038 R  text 
+add_elements           00000000 RG text 
+allocate_mem           ******** XG
+begin_iter             00000094 R  text 
+begin_loop_add         00000020 R  text 
+build_tree             00000050 R  text 
+end_iter               00000114 R  text 
+have_left              0000010C R  text 
+have_right             000000D4 R  text 
+less_than              000000DC R  text 
+node_memory_pointer    00000004 R  data 
